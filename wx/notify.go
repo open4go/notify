@@ -2,19 +2,20 @@ package wx
 
 import (
 	"context"
+	"errors"
 	"github.com/silenceper/wechat/v2"
 	"github.com/silenceper/wechat/v2/cache"
 	"github.com/silenceper/wechat/v2/miniprogram"
 	miniConfig "github.com/silenceper/wechat/v2/miniprogram/config"
 	"github.com/silenceper/wechat/v2/miniprogram/subscribe"
 	log "github.com/sirupsen/logrus"
-	"os"
+	"github.com/spf13/viper"
 )
 
 const (
-	// 支付订单模板
+	// PayTmpId 支付订单模板
 	PayTmpId = "XDH55V-yVYDu4_OhIWvYwXDLX5fvjDBUv2IgY6MDPD4"
-	// 取餐模板
+	// TakeOrderTmpId 取餐模板
 	TakeOrderTmpId = "bI6fgdcs9lK9YtFHz00NVAinh6hX_0bRFaRl2N6Dl1w"
 )
 
@@ -28,18 +29,21 @@ type SendPayload struct {
 	Data       map[string]*subscribe.DataItem
 }
 
-func NewWxMiniSubscriber(appId string, secretKey string) *MiniSubscribeMessage {
+func NewWxMiniSubscriber(ctx context.Context,
+	appId string, secretKey string) (*MiniSubscribeMessage, error) {
 	// 小程序配置
 	config := &miniConfig.Config{
 		AppID:     appId,
 		AppSecret: secretKey,
 	}
 
-	r := os.Getenv("REDIS_ADDR")
+	noRedisUri := errors.New("redis.uri not set")
+	r := viper.GetString("redis.uri")
 	if r == "" {
-		panic("please set REDIS_ADDR env")
+		log.WithField("redis.uri", r).Warning(noRedisUri)
+		return nil, noRedisUri
 	}
-	cacheRedis := cache.NewRedis(context.Background(), &cache.RedisOpts{
+	cacheRedis := cache.NewRedis(ctx, &cache.RedisOpts{
 		Host:        r,
 		Password:    "",
 		Database:    0,
@@ -55,7 +59,7 @@ func NewWxMiniSubscriber(appId string, secretKey string) *MiniSubscribeMessage {
 	miniProgram.SetAccessTokenHandle(NewTokenHandler()) //  设置微信小程序AccessToken的函数
 	return &MiniSubscribeMessage{
 		miniProgram: miniProgram,
-	}
+	}, nil
 }
 
 // SendApi 内部接口调用的接口

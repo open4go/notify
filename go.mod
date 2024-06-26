@@ -5,7 +5,6 @@ go 1.21.5
 require (
 	github.com/r2day/base v1.6.7
 	github.com/r2day/db v0.3.5
-	github.com/r2day/pay-api v0.0.0-20240124081613-e46854f2927c
 	github.com/silenceper/wechat/v2 v2.1.6
 	github.com/sirupsen/logrus v1.9.3
 )
