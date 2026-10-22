@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/r2day/db"
 	log "github.com/sirupsen/logrus"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 )
@@ -33,9 +33,9 @@ func getWxaAccessToken(appId, appSecret string) (*GetWxaAccessTokenResp, error) 
 	if err != nil {
 		return nil, err
 	}
-	defer wxResp.Body.Close()
+	defer func() { _ = wxResp.Body.Close() }()
 
-	b, err := ioutil.ReadAll(wxResp.Body)
+	b, err := io.ReadAll(wxResp.Body)
 	if err != nil {
 		return nil, err
 	}
