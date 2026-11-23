@@ -1,7 +1,8 @@
 package wx
 
 import (
-	rtime "github.com/r2day/base/time"
+	"time"
+
 	"github.com/silenceper/wechat/v2/miniprogram/subscribe"
 )
 
@@ -12,7 +13,7 @@ func NewPayMessage(queueNumber string, amount string, location string, orderTime
 		"thing5":   {Value: queueNumber},
 		"amount12": {Value: amount},
 		"thing7":   {Value: location},
-		"date4":    {Value: rtime.FomratTimeAsReader(orderTime)},
+		"date4":    {Value: time.Unix(orderTime, 0).Format(time.DateTime)},
 	}
 }
 
@@ -38,7 +39,7 @@ func NewTakeGoodsMessage(queueNumber string, amount string, location string) map
 			Value: location,
 		},
 		"time21": {
-			Value: rtime.GetCurrentTime(),
+			Value: time.Now().Format("2006.01.02 15:04"),
 		},
 	}
 }
